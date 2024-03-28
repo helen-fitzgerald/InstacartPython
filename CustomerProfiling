@@ -1,0 +1,119 @@
+# Importing libraries and files
+import pandas as pd
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy
+path = r'/Users/helen/03-24 Instacart Basket Analysis'
+ords_prods_all = pd.read_pickle(os.path.join(path, '02 Data','Prepared Data', 'ords_prods_cust.pkl'))
+
+# Categorising users by region
+# Creating a list for each region and filling it with the appropriate states
+
+ne_list = ['Maine', 'New Hampshire', 'Vermont', 'Massachusetts', 'Rhode Island', 'Connecticut', 'New York', 'Pennsylvania', 'New Jersey']
+mw_list = ['Wisconsin', 'Michigan', 'Illinois', 'Indiana', 'Ohio', 'North Dakota', 'South Dakota', 'Nebraska', 'Kansas', 'Minnesota', 'Iowa', 'Missouri']
+s_list = ['Delaware', 'Maryland', 'District of Columbia', 'Virginia', 'West Virginia', 'North Carolina', 
+          'South Carolina', 'Georgia', 'Florida', 'Kentucky', 'Tennessee', 'Alabama', 'Mississippi', 'Oklahoma', 'Texas', 'Arkansas', 'Louisiana']
+w_list = ['Idaho', 'Montana', 'Wyoming', 'Nevada', 'Utah', 'Colorado', 'Arizona', 'New Mexico', 'Alaska', 'Washington', 'Oregon', 'California', 'Hawaii']
+
+# Adding region flag
+ords_prods_all.loc[ords_prods_all['state'].isin(ne_list), 'region'] = "Northeast"
+ords_prods_all.loc[ords_prods_all['state'].isin(mw_list), 'region'] = "Midwest"
+ords_prods_all.loc[ords_prods_all['state'].isin(s_list), 'region'] = "South"
+ords_prods_all.loc[ords_prods_all['state'].isin(w_list), 'region'] = "West"
+
+# Checking the result
+ords_prods_all.head(3)
+
+# Exploring region-based ordering habits
+
+# Determining how many customers are based in each region
+ords_prods_all.groupby('region')['user_id'].count()
+
+# Creating a chart to represent the distribution of customers per region
+bar_1 = ords_prods_all['region'].value_counts().plot.bar(color = ['blue','pink', 'violet','lime'])
+
+# Checking how many high/low spenders are in each region
+ords_prods_all.groupby('region')['spending_flag'].value_counts()
+
+# Checking the loyalty flag per region
+regional_loyalty = ords_prods_all.groupby('region')['loyalty_flag'].value_counts()
+
+# Creating an exclusion flag for low-activity customers
+ords_prods_all.loc[ords_prods_all['max_order'] <5, 'exclusion_flag'] = 'Low-activity'
+ords_prods_all.loc[ords_prods_all['max_order'] >=5, 'exclusion_flag'] = 'High-activity'
+ords_prods_all['exclusion_flag'].value_counts(dropna = False)
+
+# Creating a new df that only contains high-activity customers
+ords_prods_all_high_activity = ords_prods_all[ords_prods_all.exclusion_flag == 'High-activity']
+
+# Product and department breakdowns
+
+#The breakdown of price ranges
+def price_label(row):
+
+  if row['prices'] <= 5:
+    return 'Low-range product'
+  elif (row['prices'] > 5) and (row['prices'] <= 15):
+    return 'Mid-range product'
+  elif row['prices'] > 15:
+    return 'High range'
+  else: pass
+
+ords_prods_all_high_activity['price_range'] = ords_prods_all_high_activity.apply(price_label, axis=1)
+ords_prods_all_high_activity['price_range'].value_counts()
+price_range_counts = ords_prods_all_high_activity['price_range'].value_counts()
+
+# Exploring department performance
+bar_2 = ords_prods_all_high_activity['department_id'].value_counts().sort_index().plot.bar(color = 'violet')
+bar_2.set_ylabel('Number of Orders')
+
+# Checking the relationship between the number of customer orders and customer dependants
+bar_3 = ords_prods_all_high_activity['dependants'].value_counts().sort_index().plot.bar(color = 'lime')
+plt.ylabel('Number of Orders')
+
+# Exploring the relationship between customer loyalty and gender
+loyal_customers = ords_prods_all_high_activity[ords_prods_all_high_activity['loyalty_flag'] == 'Loyal customer']
+gender_counts = loyal_customers['gender'].value_counts()
+colors = ['blue', 'pink', 'violet', 'lime']
+plt.figure(figsize=(8, 6))
+plt.pie(gender_counts, labels=gender_counts.index, autopct='%1.1f%%', startangle=140, colors = colors)
+plt.title('Gender Breakdown of Loyal Customers')
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+loyal_gen = plt
+
+# Creating a 'parent' subcategory
+parent_df = ords_prods_all_high_activity[ords_prods_all_high_activity['department_id'] == 18]
+parent_scatter = sns.scatterplot(x = 'age', y = 'income',data = parent_df)
+
+# Exploring family_status figures
+fam_bar = ords_prods_all_high_activity['family_status'].value_counts().plot.bar(color = ['orange','blue', 'violet', 'lime'])
+plt.ylabel('Amount of customers')
+
+# Exploring the regional breakdown of loyal customers
+loyal_customers_by_region = loyal_customers['region'].value_counts()
+plt.figure(figsize=(8, 6))
+plt.pie(loyal_customers_by_region, labels=loyal_customers_by_region.index, autopct='%1.1f%%', startangle=140, colors = colors)
+plt.title('Loyal Customers Breakdown by Region')
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+loyal_region = plt
+
+# Exploring the ages of married customers
+married_status = ords_prods_all_high_activity[ords_prods_all_high_activity['family_status'] == 'married']
+age_counts = married_status['age'].value_counts().sort_index()
+married_age_line = plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
+plt.plot(age_counts.index, age_counts.values, marker='o', linestyle='-')
+plt.xlabel('Age')
+plt.ylabel('Number of Users')
+plt.title('Number of Users by Age')
+plt.grid(True)
+plt.show()
+
+# Exploring the incomes of loyal customers
+loyal_age_income = sns.scatterplot(x = 'age', y = 'income',data = loyal_customers)
+
+# Illustrating loyalty divisons
+loyal_counts = ords_prods_all['loyalty_flag'].value_counts()
+loyalty_pie = plt.pie(loyal_counts,labels = loyal_counts.index, autopct='%1.1f%%', colors=['pink', 'blue', 'lime'])
+plt.title('Distribution of Customer Loyalty')
