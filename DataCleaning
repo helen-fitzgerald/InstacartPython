@@ -1,0 +1,50 @@
+# Importing libraries and files
+import pandas as pd
+import numpy as np
+import os
+path = r'/Users/helen/03-24 Instacart Basket Analysis'
+df_prods = pd.read_csv(os.path.join(path, '02 Data', 'Original Data', 'products.csv'), index_col = False)
+df_ords = pd.read_csv(os.path.join(path, '02 Data', 'Prepared Data', 'orders_wrangled.csv'), index_col = False)
+
+# Finding missing values in the prods df
+df_prods.isnull().sum()
+df_nan = df_prods[df_prods['product_name'].isnull() == True]
+df_nan
+df_prods_clean = df_prods[df_prods['product_name'].isnull() == False]
+df_prods_clean.shape
+
+# Finding duplicates in the prods df
+df_dups = df_prods_clean[df_prods_clean.duplicated()]
+df_dups
+df_prods_clean.shape
+df_prods_clean_no_dups = df_prods_clean.drop_duplicates()
+df_prods_clean_no_dups.shape
+
+# Finding mixed values in the ords df
+for col in df_ords.columns.tolist():
+  weird = (df_ords[[col]].map(type) != df_ords[[col]].iloc[0].apply(type)).any(axis = 1)
+  if len (df_ords[weird]) > 0:
+    print (col)
+  else: print ('no mixed-type data')
+
+# Finding missing values in the ords df
+df_ords.isnull().sum()
+df_ords_new_cust = df_ords[df_ords['days_since_last_order'].isnull() == True]
+
+# days_since_last_order contains 206209 missing values. Each of these instances likely represents a customer's first order 
+# (as they logically do not have a 'last order' to compare this to). The complete dropping of these observations would risk the loss of vital 
+# first-time customer data, but it does not make sense to impute a value in this instance. Instead, I will create a subset of first-time customers 
+# and a separate subset of repeat customers for later examination.
+
+# Confirming that this new subset contains first-time orders only.
+df_ords_new_cust['order_number'].value_counts()
+
+# Creating a separate subset containing only returning customers
+df_ords_repeat_cust = df_ords[df_ords['days_since_last_order'].isnull() == False]
+
+# Confirming that this new subset contains non-first-time orders only.
+df_ords_repeat_cust['order_number'].value_counts()
+
+#Finding duplicates in the ords df
+df_ords_dups = df_ords[df_ords.duplicated()]
+df_ords_dups
