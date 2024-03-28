@@ -1,0 +1,20 @@
+# Importing libraries and files
+import pandas as pd
+import numpy as np
+import os
+path = r'/Users/helen/03-24 Instacart Basket Analysis'
+ords_prods_merge = pd.read_pickle(os.path.join(path, '02 Data', 'Prepared Data', 'orders_products_merged.pkl'))
+df = ords_prods_merge[:1000000]
+
+# Grouping and aggregating
+df.groupby('product_name')
+df.groupby('department_id').agg({'order_number': ['mean', 'min', 'max']})
+ords_prods_merge['max_order'] = ords_prods_merge.groupby(['user_id'])['order_number'].transform(np.max)
+pd.options.display.max_rows = None
+ords_prods_merge.head(100)
+
+# Creating loyal customer flag
+ords_prods_merge.loc[ords_prods_merge['max_order'] > 40, 'loyalty_flag'] = 'Loyal customer'
+ords_prods_merge.loc[(ords_prods_merge['max_order'] <= 40) & (ords_prods_merge['max_order'] > 10), 'loyalty_flag'] = 'Regular customer'
+ords_prods_merge.loc[ords_prods_merge['max_order'] <= 10, 'loyalty_flag'] = 'New customer'
+ords_prods_merge['loyalty_flag'].value_counts(dropna = False)
