@@ -1,0 +1,41 @@
+# Importing libraries and files
+import pandas as pd
+import numpy as np
+import os
+path = r'/Users/helen/03-24 Instacart Basket Analysis'
+ords_prods_merge = pd.read_pickle(os.path.join(path, '02 Data', 'Prepared Data', 'orders_products_merged.pkl'))
+df = ords_prods_merge[:1000000]
+
+# Defining the if-statement
+def price_label(row):
+  if row['prices'] <= 5:
+    return 'Low-range product'
+  elif (row['prices'] > 5) and (row['prices'] <= 15):
+    return 'Mid-range product'
+  elif row['prices'] > 15:
+    return 'High range'
+  else: return 'Not enough data'
+
+df['price_range'] = df.apply(price_label, axis=1)
+df['price_range'].value_counts()
+df['prices'].max()
+
+# If-statement w/ loc function
+df.loc[df['prices'] > 15, 'price_range_loc'] = 'High-range product'
+df.loc[(df['prices'] <= 15) & (df['prices'] > 5), 'price_range_loc'] = 'Mid-range product' 
+df.loc[df['prices'] <= 5, 'price_range_loc'] = 'Low-range product'
+df['price_range_loc'].value_counts(dropna = False)
+
+# If-statement w/ for-loops
+ords_prods_merge['orders_day_of_week'].value_counts(dropna = False)
+result = []
+
+for value in ords_prods_merge["orders_day_of_week"]:
+  if value == 0:
+    result.append("Busiest day")
+  elif value == 4:
+    result.append("Least busy")
+  else:
+    result.append("Regularly busy")
+ords_prods_merge['busiest_day'] = result
+ords_prods_merge['busiest_day'].value_counts(dropna = False)
