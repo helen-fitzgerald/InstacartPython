@@ -1,0 +1,52 @@
+# Importing libraries and files
+import pandas as pd
+import numpy as np
+import os
+path = r'/Users/helen/03-24 Instacart Basket Analysis'
+df_ords = pd.read_csv(os.path.join(path, '02 Data', 'Original Data', 'orders.csv'), index_col = False)
+df_prods = pd.read_csv(os.path.join(path, '02 Data', 'Original Data', 'products.csv'), index_col = False)
+
+## Data wrangling
+# Dropping eval_set from df_ords
+df_ords.drop(columns = ['eval_set'])
+df_ords_2 = df_ords.drop(columns = ['eval_set'])
+df_ords_2['days_since_prior_order'].value_counts(dropna = False)
+df_ords_2.rename(columns = {'order_dow' : 'orders_day_of_week'}, inplace = True)
+df_ords_2.head()
+df_ords_2['order_id'] = df_ords['order_id'].astype('str')
+df_ords_2['order_id'].dtype
+df_dep = pd.read_csv(os.path.join(path, '02 Data', 'Original Data', 'departments.csv'), index_col = False)
+df_dep.head()
+df_dep.T
+df_dep_t = df_dep.T
+df_dep_t.reset_index()
+
+# New Header
+new_header = df_dep_t.iloc[0]
+df_dep_t_new = df_dep_t[1:]
+df_dep_t_new
+df_dep_t_new.columns = new_header
+data_dict = df_dep_t_new.to_dict('index')
+data_dict
+print(data_dict.get('19'))
+df_prods['department_id']==19
+df_prods[df_prods['department_id']==19]
+df_snacks =  df_prods[df_prods['department_id']==19]
+
+# Look for a variable in the df_ords dataframe with an unintuitive name and change its name without overwriting the dataframe
+df_ords_2.rename(columns = {'days_since_prior_order' : 'days_since_last_order'}, inplace = True)
+
+# Finding the busiest hour for placing orders
+df_ords_2['order_hour_of_day'].value_counts(dropna = False)
+
+# The sales team in your client’s organization wants to know more about breakfast item sales. Create a subset containing only the required information.
+df_breakfast =  df_prods[df_prods['department_id']==14]
+
+# They’d also like to see details about products that customers might use to throw dinner parties. Find all observations from the entire dataframe that 
+# include items from the following departments: alcohol, deli, beverages, and meat/seafood. Present this subset.
+df_dinner = df_prods.loc[df_prods['department_id'].isin([5,7,12,20])]
+
+# Someone from the data engineers team in Instacart thinks they’ve spotted something strange about the customer with a "user_id" of “1.” 
+# Extract all the information you can about this user.
+df_ords_2[df_ords_2['user_id']=='1']
+user_id_1 = df_ords_2[df_ords_2['user_id']=='1']
