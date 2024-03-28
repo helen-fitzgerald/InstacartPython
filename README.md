@@ -10,11 +10,11 @@ to derive insights and suggest strategies for better segmentation based on
 the provided criteria.
 
 ## Project Contents
-Project Management - includes full project brief.
-Data - includes original and cleaned data.
-Scripts - includes complete code for data wrangling, visualisations etc.
-Analysis - includes raw visualisation files.
-Sent to Client - includes final Excel report.
+1. Project Management - includes full project brief.
+2. Data - includes original and cleaned data.
+3. Scripts - includes complete code for data wrangling, visualisations etc.
+4. Analysis - includes raw visualisation files.
+5. Sent to Client - includes final Excel report.
 
 # Data Set
 [Available here](https://s3.amazonaws.com/coach-courses-us/public/courses/data-immersion/A4/A4_Data_Assets/customers.zip)
