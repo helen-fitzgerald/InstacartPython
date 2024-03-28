@@ -10,7 +10,7 @@ to derive insights and suggest strategies for better segmentation based on
 the provided criteria.
 
 ## Project Contents
-1. Project Management - includes full project brief.
+1. Project Management - includes [full project brief.](https://images.careerfoundry.com/public/courses/data-immersion/A4/A4_Data_Immersion_Project_Brief.pdf)
 2. Data - includes original and cleaned data.
 3. Scripts - includes complete code for data wrangling, visualisations etc.
 4. Analysis - includes raw visualisation files.
